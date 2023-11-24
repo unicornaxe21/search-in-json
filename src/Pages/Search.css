@@ -1,0 +1,12 @@
+.tableContainer{
+    background-color: #e5e6ec;
+    border-radius: 20px;
+    height: 300px;
+    margin: 10px 10px 100px 10px;
+    width: 100%;
+}
+
+
+.widths{
+    width: 200px;
+}
