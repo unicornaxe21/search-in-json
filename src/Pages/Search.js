@@ -48,6 +48,17 @@ import Database from "./data/Database3.json";
 //   });
 // });
 
+const context = require.context('./data_new', true, /.json$/);
+const all_data = {};
+context.keys().forEach((key: any) => {
+  const fileName = key.replace('./', '');
+  const resource = require(`./data_new/${fileName}`);
+  const namespace = fileName.split('_')[1].replace('.json', '');
+  all_data[namespace] = JSON.parse(JSON.stringify(resource));
+ 
+});
+console.log(all_data)
+
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 58;
 const MenuProps = {
@@ -125,15 +136,19 @@ function Search() {
   useEffect(() => {
     let valueIndex = {};
     let Rankings = ["  Select All  "];
-    for (const index in Database) {
-      const element = Database[index];
-      if (element[QS_Rank]) {
-        if (!valueIndex[element[QS_Rank]]) {
-          valueIndex[element[QS_Rank]] = true;
-          Rankings.push(element[QS_Rank]);
+    for (const key in all_data) {
+      const db = all_data[key];
+      for (const index in db) {
+        const element = db[index];
+        if (element[QS_Rank]) {
+          if (!valueIndex[element[QS_Rank]]) {
+            valueIndex[element[QS_Rank]] = true;
+            Rankings.push(element[QS_Rank]);
+          }
         }
       }
     }
+    
 
     for (let i = 0; i < Rankings.length; i++) {
       for (let j = 0; j < Rankings.length; j++) {
@@ -479,15 +494,17 @@ function Search() {
       const element = Database[index];
       for (const key in University) {
         if (University[key].value === element[University_Name].trim()) {
-          if (alignment == 'department') {
+          if (alignment === 'department') {
             for (const key2 in Department) {
               if (element[Departments_Teg] !== "") {
                 if (Department[key2].Tag === element[Departments_Teg].trim()) {
                   Display_data.push({
-                    Country: element[Country_Name].trim(),
-                    University: element[University_Name].trim(),
-                    Department: element[Departments_Name].trim(),
-                    Tag: element[Departments_Teg].trim(),
+                    Lead_ID: element[Lead_ID].trim(),
+                    FieldOfResearch: element[Field_Of_Research].trim(),
+                    // Country: element[Country_Name].trim(),
+                    // University: element[University_Name].trim(),
+                    // Department: element[Departments_Name].trim(),
+                    // Tag: element[Departments_Teg].trim(),
                   });
                 }
   
@@ -495,10 +512,12 @@ function Search() {
                   element[Departments_Teg].trim().includes(Department[key2].Tag)
                 ) {
                   Display_data.push({
-                    Country: element[Country_Name].trim(),
-                    University: element[University_Name].trim(),
-                    Department: element[Departments_Name].trim(),
-                    Tag: element[Departments_Teg].trim(),
+                    Lead_ID: element[Lead_ID].trim(),
+                    FieldOfResearch: element[Field_Of_Research].trim(),
+                    // Country: element[Country_Name].trim(),
+                    // University: element[University_Name].trim(),
+                    // Department: element[Departments_Name].trim(),
+                    // Tag: element[Departments_Teg].trim(),
                   });
                 }
   
@@ -506,10 +525,12 @@ function Search() {
                   Department[key2].Tag.includes(element[Departments_Teg].trim())
                 ) {
                   Display_data.push({
-                    Country: element[Country_Name].trim(),
-                    University: element[University_Name].trim(),
-                    Department: element[Departments_Name].trim(),
-                    Tag: element[Departments_Teg].trim(),
+                    Lead_ID: element[Lead_ID].trim(),
+                    FieldOfResearch: element[Field_Of_Research].trim(),
+                    // Country: element[Country_Name].trim(),
+                    // University: element[University_Name].trim(),
+                    // Department: element[Departments_Name].trim(),
+                    // Tag: element[Departments_Teg].trim(),
                   });
                 }
               }
@@ -521,10 +542,12 @@ function Search() {
                   element[Field_Of_Research].trim().includes(FieldOfResearch[key2].value)
                 ) {
                   Display_data.push({
-                    Country: element[Country_Name].trim(),
-                    University: element[University_Name].trim(),
-                    Department: element[Departments_Name].trim(),
-                    Tag: element[Departments_Teg].trim(),
+                    Lead_ID: element[Lead_ID].trim(),
+                    FieldOfResearch: element[Field_Of_Research].trim(),
+                    // Country: element[Country_Name].trim(),
+                    // University: element[University_Name].trim(),
+                    // Department: element[Departments_Name].trim(),
+                    // Tag: element[Departments_Teg].trim(),
                   });
                 }
               }
@@ -826,7 +849,7 @@ useEffect(() => {
         </ToggleButtonGroup>
         <br />
         <br />
-        <div style={{ display: alignment == 'department' ? 'block' : 'none' }}>
+        <div style={{ display: alignment === 'department' ? 'block' : 'none' }}>
           <Typography className="text-24 mt-24 mb-8" component="h2">
             Department
           </Typography>
@@ -847,7 +870,7 @@ useEffect(() => {
           />
         </div>
         <br />
-        <div style={{ display: alignment == 'field' ? 'block' : 'none' }}>
+        <div style={{ display: alignment === 'field' ? 'block' : 'none' }}>
           <Typography className="text-24 mt-24 mb-8" component="h2">
             Field of Research
           </Typography>
@@ -893,10 +916,12 @@ useEffect(() => {
           >
             <TableHead>
               <TableRow>
-                <TableCell align="right">Country</TableCell>
+                <TableCell align="right" width="20%">Lead-ID</TableCell>
+                <TableCell align="left" width="80%">Field of Research</TableCell>
+                {/* <TableCell align="right">Country</TableCell>
                 <TableCell align="right">University Name</TableCell>
                 <TableCell align="right">Department Name</TableCell>
-                <TableCell align="right">Departments Teg</TableCell>
+                <TableCell align="right">Departments Teg</TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -905,10 +930,12 @@ useEffect(() => {
                   key={index}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
-                  <TableCell align="right">{row["Country"]}</TableCell>
+                  <TableCell align="right">{row["Lead_ID"]}</TableCell>
+                  <TableCell align="left">{row["FieldOfResearch"]}</TableCell>
+                  {/* <TableCell align="right">{row["Country"]}</TableCell>
                   <TableCell align="right">{row["University"]}</TableCell>
                   <TableCell align="right">{row["Department"]}</TableCell>
-                  <TableCell align="right">{row["Tag"]}</TableCell>
+                  <TableCell align="right">{row["Tag"]}</TableCell> */}
                 </TableRow>
               ))}
             </TableBody>
