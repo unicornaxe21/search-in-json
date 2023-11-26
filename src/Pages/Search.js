@@ -30,34 +30,23 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 
 import "./Search.css";
-import Database from "./data/Database3.json";
+// import Database from "./data/Database3.json";
 
-// const fs = require('fs');
-
-// const directoryPath = './data';
-// fs.readdir(directoryPath, (err, files) => {
-//   if (err) {
-//     console.error('Error reading directory:', err);
-//     return;
-//   }
-
-//   // Process the files and folders
-//   files.forEach((file) => {
-//     console.log(file);
-//     // You can perform further operations on each file or folder
-//   });
-// });
 
 const context = require.context('./data_new', true, /.json$/);
 const all_data = {};
+let Database = [];
 context.keys().forEach((key: any) => {
   const fileName = key.replace('./', '');
   const resource = require(`./data_new/${fileName}`);
   const namespace = fileName.split('_')[1].replace('.json', '');
-  all_data[namespace] = JSON.parse(JSON.stringify(resource));
- 
+  // all_data[namespace] = JSON.parse(JSON.stringify(resource));
+  const temp = JSON.parse(JSON.stringify(resource));
+  for (var i in temp) {
+
+    Database.push(temp[i]);
+  }
 });
-console.log(all_data)
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 58;
@@ -76,8 +65,8 @@ const Country_Name = "Country Name";
 const University_ID = "University-ID";
 const University_Name = "University Name";
 const QS_Rank = "QS Rank";
-const Departments_Name = "Departments Name";
-const Departments_Teg = "Departments Teg";
+const Departments_Name = "Department";
+const Departments_Teg = "Department Tag";
 const Department_Identification = "Department Identification";
 const Professor_Fellad_Teg = "Professor Fellad Teg";
 const Prs_Links = "Prs Links";
@@ -90,11 +79,15 @@ function Search() {
   }
 
   function Exist(Datas, SpecialValue) {
+    if (SpecialValue === '' || SpecialValue === undefined) return 0;
+
     const cap = SpecialValue.trim();
     let exist = 0;
     for (const key in Datas) {
       if (Datas[key].value === cap) exist = 1;
       if (Datas[key] === cap) exist = 1;
+      if (cap.includes(Datas[key])) exist = 1;
+      if (cap.includes(Datas[key].value)) exist = 1;
     }
     if (exist === 1) return 1;
     else return 0;
@@ -136,10 +129,8 @@ function Search() {
   useEffect(() => {
     let valueIndex = {};
     let Rankings = ["  Select All  "];
-    for (const key in all_data) {
-      const db = all_data[key];
-      for (const index in db) {
-        const element = db[index];
+      for (const index in Database) {
+        const element = Database[index];
         if (element[QS_Rank]) {
           if (!valueIndex[element[QS_Rank]]) {
             valueIndex[element[QS_Rank]] = true;
@@ -147,8 +138,6 @@ function Search() {
           }
         }
       }
-    }
-    
 
     for (let i = 0; i < Rankings.length; i++) {
       for (let j = 0; j < Rankings.length; j++) {
@@ -273,28 +262,26 @@ function Search() {
 
   useEffect(() => {
     let valueIndex = {};
-    let University = ["  Select All  "];
-    let i = 0;
+    let University = [];
+    
     for (const index in Database) {
       const element = Database[index];
 
-      i += Exist(Country, element[Country_Name].toUpperCase().trim());
-      i += Exist(Qs, element[QS_Rank]);
       if (element[University_Name]) {
         //console.log(Exist(Country,element,"Country"))
-        if (!valueIndex[element[University_Name].trim()]) {
-          if (i === 2) {
-            valueIndex[element[University_Name].trim()] = true;
-            const capitalized =
-              element[University_Name].charAt(0).toUpperCase() +
-              element[University_Name].slice(1);
-            University.push(capitalized.trim());
-          }
+        if (Exist(Country, element[Country_Name].toUpperCase().trim()) && Exist(Qs, element[QS_Rank])) {
+          const capitalized =
+            element[University_Name].charAt(0).toUpperCase() +
+            element[University_Name].slice(1);
+          University.push(capitalized.trim());
         }
       }
-      i = 0;
+      
     }
+    
+    University = University.filter(onlyUnique);
     University.sort();
+    if (University.length > 0) University.splice(0, 0, "  Select All  "); 
     setSuggestions_Universitys(University);
   }, [Qs, Country]);
 
@@ -341,34 +328,35 @@ function Search() {
     for (const index in Database) {
       const element = Database[index];
       
-      i += Exist(Country, element[Country_Name].toUpperCase().trim());
-      i += Exist(Qs, element[QS_Rank]);
-      i += Exist(University, element[University_Name]);
       if (element[Departments_Name]) {
           const capitalized =
             element[Departments_Name].charAt(0).toUpperCase() +
             element[Departments_Name].slice(1);
-            
-          if (i === 3)
-            Departments.push({
-              value: capitalized.trim(),
-              Tag: element[Departments_Teg],
-            });
+            if (!valueIndex[element[Departments_Name].trim()]) {
+              valueIndex[element[Departments_Name].trim()] = true;
+              if (Exist(Country, element[Country_Name].toUpperCase().trim()) && Exist(Qs, element[QS_Rank]) && Exist(University, element[University_Name].trim())) {
+                Departments.push({
+                  value: capitalized.trim(),
+                  Tag: element[Departments_Teg],
+                  label: capitalized.trim(),
+                });
+              }
+            }
       }
       i = 0;
     }
     //Departments.sort();
-    Departments = Departments.filter(onlyUnique);
+    // Departments = Departments.filter(onlyUnique);
     Departments.sort((a, b) => (a.value > b.value ? 1 : -1));
     setSuggestions_Departments(Departments);
   }, [Qs, Country, University]);
 
   function handleChipChange_Department(value) {
-    let i = 0,
-      j = 0;
+    let i = 0, j = 0;
     for (const keyss in value) {
       if (value[keyss].value === "  Select All  ") i = 1;
     }
+    
     if (i === 1) {
       let valueIndexs = {};
       let Departmentss = [];
@@ -434,7 +422,7 @@ function Search() {
     }
     //Departments.sort();
     fields = fields.filter(onlyUnique);
-    fields.sort((a, b) => (a.value > b.value ? 1 : -1));
+    fields.sort();
     setSuggestions_FieldsOfResearch(fields);
   }, [Qs, Country, University]);
 
@@ -451,13 +439,10 @@ function Search() {
       let fields = [];
       for (const index in Database) {
         const element = Database[index];
-        j += Exist(Country, element[Country_Name].toUpperCase().trim());
-        j += Exist(Qs, element[QS_Rank]);
-        j += Exist(University, element[University_Name]);
 
         if (element[Field_Of_Research].trim()) {
           if (!valueIndexs[element[Field_Of_Research].trim()]) {
-            if (j === 3) {
+            if (Exist(Country, element[Country_Name].toUpperCase().trim()) && Exist(Qs, element[QS_Rank]) && Exist(University, element[University_Name])) {
               valueIndexs[element[Field_Of_Research].trim()] = true;
               const capitalized = element[Field_Of_Research].trim();
               const array = capitalized.split(", ");
@@ -496,7 +481,14 @@ function Search() {
         if (University[key].value === element[University_Name].trim()) {
           if (alignment === 'department') {
             for (const key2 in Department) {
-              if (element[Departments_Teg] !== "") {
+              if (Exist(Department, element[Departments_Name].trim())) {
+                Display_data.push({
+                  Lead_ID: element[Lead_ID].trim(),
+                  FieldOfResearch: element[Field_Of_Research].trim(),
+                });
+              }
+              /*if (element[Departments_Teg] !== "") {
+
                 if (Department[key2].Tag === element[Departments_Teg].trim()) {
                   Display_data.push({
                     Lead_ID: element[Lead_ID].trim(),
@@ -533,7 +525,8 @@ function Search() {
                     // Tag: element[Departments_Teg].trim(),
                   });
                 }
-              }
+              }*/
+
             }
           } else {
             for (const key2 in FieldOfResearch) {
@@ -556,22 +549,24 @@ function Search() {
         }
       }
     }
-    var result = Display_data.reduce((unique, o) => {
-      if (
-        !unique.some(
-          (obj) =>
-            obj.Country === o.Country &&
-            obj.University === o.University &&
-            obj.Department === o.Department &&
-            obj.Tag === o.Tag
-        )
-      ) {
-        unique.push(o);
-        selected_departments_num++;
-      }
-      return unique;
-    }, []);
-    setLinks(result);
+    
+    // var result = Display_data.reduce((unique, o) => {
+    //   if (
+    //     !unique.some(
+    //       (obj) =>
+    //         obj.Country === o.Country &&
+    //         obj.University === o.University &&
+    //         obj.Department === o.Department 
+    //         && obj.Tag === o.Tag
+    //     )
+    //   ) {
+    //     unique.push(o);
+    //     selected_departments_num++;
+    //   }
+    //   return unique;
+    // }, []);
+    // setLinks(result);
+    setLinks(Display_data);
 
     set_departments_num(selected_departments_num);
     let aa = 0,
@@ -586,10 +581,16 @@ function Search() {
       const University_Data = element[University_Name];
       const Qs_Data = element[QS_Rank];
       const Department_Data = element[Departments_Name];
+      const Field_Data = element[Field_Of_Research];
       aa = Exist(Country, Country_Data);
       bb = Exist(University, University_Data);
       cc = Exist(Qs, Qs_Data);
-      dd = Exist(Department, Department_Data);
+      
+      if (alignment === 'department') {
+        dd = Exist(Department, Department_Data);
+      } else {
+        dd = Exist(FieldOfResearch, Field_Data);
+      }
 
       if (aa === 0 || bb === 0 || cc === 0 || dd === 0) continue;
       if (aa === 1 && bb === 1 && cc === 1 && dd === 1) {
@@ -677,10 +678,15 @@ useEffect(() => {
       const University_Data = element[University_Name];
       const Qs_Data = element[QS_Rank];
       const Department_Data = element[Departments_Name];
+      const Field_Data = element[Field_Of_Research];
       aa = Exist(Country, Country_Data);
       bb = Exist(University, University_Data);
       cc = Exist(Qs, Qs_Data);
-      dd = Exist(Department, Department_Data);
+      if (alignment === 'department') {
+        dd = Exist(Department, Department_Data);
+      } else {
+        dd = Exist(FieldOfResearch, Field_Data);
+      }
 
       if (aa === 0 || bb === 0 || cc === 0 || dd === 0) continue;
       if (aa === 1 && bb === 1 && cc === 1 && dd === 1) {
