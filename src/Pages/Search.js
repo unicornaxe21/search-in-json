@@ -32,6 +32,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 
 import "./Search.css";
+import { Filter } from "@mui/icons-material";
 // import Database from "./data/Database3.json";
 
 
@@ -500,6 +501,7 @@ function Search() {
                 Display_data.push({
                   Lead_ID: element[Lead_ID].trim(),
                   FieldOfResearch: element[Field_Of_Research].trim(),
+                  Department: element[Departments_Name].trim(),
                 });
               }
               /*if (element[Departments_Teg] !== "") {
@@ -554,7 +556,7 @@ function Search() {
                     FieldOfResearch: element[Field_Of_Research].trim(),
                     // Country: element[Country_Name].trim(),
                     // University: element[University_Name].trim(),
-                    // Department: element[Departments_Name].trim(),
+                    Department: element[Departments_Name].trim(),
                     // Tag: element[Departments_Teg].trim(),
                   });
                 }
@@ -705,16 +707,20 @@ useEffect(() => {
 
       if (aa === 0 || bb === 0 || cc === 0 || dd === 0) continue;
       if (aa === 1 && bb === 1 && cc === 1 && dd === 1) {
-        Filtered.push(Database[index]);
+        Filtered.push({
+          'Lead_ID': Database[index][Lead_ID],
+          'Department': Database[index][Departments_Name],
+          'Field_of_Research': Database[index][Field_Of_Research]
+        });
       }
       aa = 0;
       bb = 0;
       cc = 0;
       dd = 0;
     }
-
+    console.log(Filtered);
     if (Filtered.length === 0) handleClickOpen();
-
+    
     if (Filtered.length > 0 && event.target.value === "JSON")
       saveToFile("Filtered_Data.json", JSON.stringify(Filtered));
 
@@ -938,7 +944,8 @@ useEffect(() => {
             <TableHead>
               <TableRow>
                 <TableCell align="right" width="20%">Lead-ID</TableCell>
-                <TableCell align="left" width="80%">Field of Research</TableCell>
+                <TableCell align="left" width="20%">Department</TableCell>
+                <TableCell align="left" width="60%">Field of Research</TableCell>
                 {/* <TableCell align="right">Country</TableCell>
                 <TableCell align="right">University Name</TableCell>
                 <TableCell align="right">Department Name</TableCell>
@@ -952,6 +959,7 @@ useEffect(() => {
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <TableCell align="right">{row["Lead_ID"]}</TableCell>
+                  <TableCell align="left">{row["Department"]}</TableCell>
                   <TableCell align="left">{row["FieldOfResearch"]}</TableCell>
                   {/* <TableCell align="right">{row["Country"]}</TableCell>
                   <TableCell align="right">{row["University"]}</TableCell>
