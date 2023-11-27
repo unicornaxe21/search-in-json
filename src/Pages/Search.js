@@ -404,7 +404,7 @@ function Search() {
   //---------------------------Field of Research-------------------------
   useEffect(() => {
     let valueIndex = {};
-    let fields = [/*"  Select All "*/];
+    let fields = ["  Select All "];
     let i = 0;
     for (const index in Database) {
       const element = Database[index];
@@ -439,10 +439,9 @@ function Search() {
   }, [Qs, Country, University]);
 
   function handleChipChange_Field(value) {
-    let i = 0,
-      j = 0;
+    console.log(value);
+    let i = 0;
     for (const keyss in value) {
-      
       if (value[keyss].value.trim() === "Select All") {
         i = 1;
       }
@@ -450,58 +449,29 @@ function Search() {
     if (i === 1) {
       let valueIndex = {};
       let fields = [];
-      // for (const index in Database) {
-      //   const element = Database[index];
-
-      //   if (element[Field_Of_Research].trim() !== '') {
-      //     // if (!valueIndexs[element[Field_Of_Research].trim()]) {
-      //       if (Exist(Country, element[Country_Name].toUpperCase().trim()) && Exist(Qs, element[QS_Rank]) && Exist(University, element[University_Name])) {
-      //         // valueIndexs[element[Field_Of_Research].trim()] = true;
-      //         const capitalized = element[Field_Of_Research].trim();
-      //         const array = capitalized.split(",");
-      //         array.forEach((el) => {
-                
-      //           if (!fields.includes(el.trim())) {
-      //             fields.push(el.trim());
-      //           }
-      //           console.log(fields);
-                  
-      //         });
-      //       }
-      //     // }
-      //   }
-      //   j = 0;
-      // }
-      
-      // fields.sort();
       for (const index in Database) {
         const element = Database[index];
   
-        i += Exist(Country, element[Country_Name].toUpperCase().trim());
-        i += Exist(Qs, element[QS_Rank]);
-        i += Exist(University, element[University_Name]);
-  
         if (element[Field_Of_Research]) {
           if (!valueIndex[element[Field_Of_Research]]) {
-            // valueIndex[element[Field_Of_Research]] = true;
-            const capitalized =
-              element[Field_Of_Research].charAt(0).toUpperCase() +
-              element[Field_Of_Research].slice(1);
-            const array = capitalized.split(",");
-            if (i === 3) {
+            valueIndex[element[Field_Of_Research]] = true;
+            const capitalized = element[Field_Of_Research];/*element[Field_Of_Research].charAt(0).toUpperCase() + element[Field_Of_Research].slice(1)*/;
+            const array =  capitalized.includes(',') ? capitalized.split(",") : [capitalized];
+            
+            if (Exist(Country, element[Country_Name].toUpperCase().trim()) && Exist(Qs, element[QS_Rank]) && Exist(University, element[University_Name])) {
               array.forEach((el) => {
-                fields.push(
-                  el.trim()
-                  // Tag:element[Departments_Teg]
-                );
+                fields.push({
+                  value: el.trim(),
+                  label: el.trim()
+                });
               });
             }
           }
         }
-        i = 0;
       }
+      // console.log(fields);
       //Departments.sort();
-      fields = fields.filter(onlyUnique);
+      // fields = fields.filter(onlyUnique);
       fields.sort();
       setField(fields);
     } else setField(value);
