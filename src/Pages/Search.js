@@ -1,5 +1,7 @@
+
+import { getUniversities } from "./xhr";
 import ChipSelect from "./ChipSelect/ChipSelect";
-import Typography from "@material-ui/core/Typography";
+import Typography from "@mui/material/Typography";
 import React, { useState, useEffect } from "react";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
@@ -33,6 +35,8 @@ import "./Search.css";
 // import Database from "./data/Database3.json";
 
 
+
+
 const context = require.context('./data_new', true, /.json$/);
 const all_data = {};
 let Database = [];
@@ -58,20 +62,20 @@ const MenuProps = {
     },
   },
 };
-const Lead_ID = "Lead ID";
+const Lead_ID = "Lead_ID";
 const Professor_Name = "Professor Name";
 const Professor_Email = "Professor Email";
-const Country_Name = "Country Name";
-const University_ID = "University-ID";
-const University_Name = "University Name";
-const QS_Rank = "QS Rank";
+const Country_Name = "Country_Name";
+const University_ID = "University_ID";
+const University_Name = "University_Name";
+const QS_Rank = "QS_Rank";
 const Departments_Name = "Department";
-const Departments_Teg = "Department Tag";
+const Departments_Teg = "Department_Tag";
 const Department_Identification = "Department Identification";
 const Professor_Fellad_Teg = "Professor Fellad Teg";
 const Prs_Links = "Prs Links";
 const URL_LINKS = "URL LINKS";
-const Field_Of_Research = "Field of Research";
+const Field_Of_Research = "Field_of_Research";
 
 function Search() {
   function onlyUnique(value, index, array) {
@@ -92,6 +96,8 @@ function Search() {
     if (exist === 1) return 1;
     else return 0;
   }
+
+  const[Database, setDatabase] = useState([]);
 
   const [Ranking, setRanking] = useState([]);
   const [Qs, setQs] = useState([]);
@@ -125,6 +131,12 @@ function Search() {
     label: item,
   }));
 
+  useEffect(() => {
+    getUniversities().then((response) =>
+      setDatabase(response)
+    );
+  }, []);
+
   //-----------------------University QS Ranking--------------------
   useEffect(() => {
     let valueIndex = {};
@@ -153,7 +165,7 @@ function Search() {
       }
     }
     setRanking(Rankings);
-  }, []);
+  }, [Database]);
 
   function handleChange_Qs(event) {
     let sel = event.target.value;
@@ -223,7 +235,7 @@ function Search() {
     }
     Countrys.sort();
     setSuggestions_Country(Countrys);
-  }, []);
+  }, [Database]);
 
   function handleChipChange_country(value) {
     let i = 0;
@@ -392,7 +404,7 @@ function Search() {
   //---------------------------Field of Research-------------------------
   useEffect(() => {
     let valueIndex = {};
-    let fields = ["  Select All "];
+    let fields = [/*"  Select All "*/];
     let i = 0;
     for (const index in Database) {
       const element = Database[index];
@@ -407,7 +419,7 @@ function Search() {
           const capitalized =
             element[Field_Of_Research].charAt(0).toUpperCase() +
             element[Field_Of_Research].slice(1);
-          const array = capitalized.split(", ");
+          const array = capitalized.split(",");
           if (i === 3) {
             array.forEach((el) => {
               fields.push(
@@ -430,33 +442,66 @@ function Search() {
     let i = 0,
       j = 0;
     for (const keyss in value) {
+      
       if (value[keyss].value.trim() === "Select All") {
         i = 1;
       }
     }
     if (i === 1) {
-      let valueIndexs = {};
+      let valueIndex = {};
       let fields = [];
+      // for (const index in Database) {
+      //   const element = Database[index];
+
+      //   if (element[Field_Of_Research].trim() !== '') {
+      //     // if (!valueIndexs[element[Field_Of_Research].trim()]) {
+      //       if (Exist(Country, element[Country_Name].toUpperCase().trim()) && Exist(Qs, element[QS_Rank]) && Exist(University, element[University_Name])) {
+      //         // valueIndexs[element[Field_Of_Research].trim()] = true;
+      //         const capitalized = element[Field_Of_Research].trim();
+      //         const array = capitalized.split(",");
+      //         array.forEach((el) => {
+                
+      //           if (!fields.includes(el.trim())) {
+      //             fields.push(el.trim());
+      //           }
+      //           console.log(fields);
+                  
+      //         });
+      //       }
+      //     // }
+      //   }
+      //   j = 0;
+      // }
+      
+      // fields.sort();
       for (const index in Database) {
         const element = Database[index];
-
-        if (element[Field_Of_Research].trim()) {
-          if (!valueIndexs[element[Field_Of_Research].trim()]) {
-            if (Exist(Country, element[Country_Name].toUpperCase().trim()) && Exist(Qs, element[QS_Rank]) && Exist(University, element[University_Name])) {
-              valueIndexs[element[Field_Of_Research].trim()] = true;
-              const capitalized = element[Field_Of_Research].trim();
-              const array = capitalized.split(", ");
+  
+        i += Exist(Country, element[Country_Name].toUpperCase().trim());
+        i += Exist(Qs, element[QS_Rank]);
+        i += Exist(University, element[University_Name]);
+  
+        if (element[Field_Of_Research]) {
+          if (!valueIndex[element[Field_Of_Research]]) {
+            // valueIndex[element[Field_Of_Research]] = true;
+            const capitalized =
+              element[Field_Of_Research].charAt(0).toUpperCase() +
+              element[Field_Of_Research].slice(1);
+            const array = capitalized.split(",");
+            if (i === 3) {
               array.forEach((el) => {
-                fields.push({
-                  value: el.trim(),
-                  label: el.trim(),
-                });
+                fields.push(
+                  el.trim()
+                  // Tag:element[Departments_Teg]
+                );
               });
             }
           }
         }
-        j = 0;
+        i = 0;
       }
+      //Departments.sort();
+      fields = fields.filter(onlyUnique);
       fields.sort();
       setField(fields);
     } else setField(value);
