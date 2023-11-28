@@ -103,9 +103,9 @@ function Search() {
   const [Ranking, setRanking] = useState([]);
   const [Qs, setQs] = useState([]);
 
-  const [Countrys, setSuggestions_Country] = useState([]);
+  const [Countries, setSuggestions_Country] = useState([]);
   const [Country, setCountry] = useState([]);
-  const Countrys_suggest = Countrys.map((item) => ({
+  const Countries_suggest = Countries.map((item) => ({
     value: item,
     label: item,
   }));
@@ -223,19 +223,19 @@ function Search() {
   //----------------------------------Country----------------------------
   useEffect(() => {
     let valueIndex = {};
-    let Countrys = ["  SELECT ALL  "];
+    let Countries = ["  SELECT ALL  "];
     for (const index in Database) {
       const element = Database[index];
       if (element[Country_Name]) {
         if (!valueIndex[element[Country_Name].toUpperCase().trim()]) {
           valueIndex[element[Country_Name].toUpperCase().trim()] = true;
           const capitalized = element[Country_Name].toUpperCase().trim();
-          Countrys.push(capitalized);
+          Countries.push(capitalized);
         }
       }
     }
-    Countrys.sort();
-    setSuggestions_Country(Countrys);
+    Countries.sort();
+    setSuggestions_Country(Countries);
   }, [Database]);
 
   function handleChipChange_country(value) {
@@ -247,22 +247,22 @@ function Search() {
     }
     if (i === 1) {
       let valueIndexs = {};
-      let Countryss = [];
+      let Countriess = [];
       for (const index in Database) {
         const element = Database[index];
         if (element[Country_Name]) {
           if (!valueIndexs[element[Country_Name].toUpperCase().trim()]) {
             valueIndexs[element[Country_Name].toUpperCase().trim()] = true;
             const capitalized = element[Country_Name].toUpperCase().trim();
-            Countryss.push({
+            Countriess.push({
               value: capitalized,
               label: capitalized,
             });
           }
         }
       }
-      Countryss.sort();
-      setCountry(Countryss);
+      Countriess.sort();
+      setCountry(Countriess);
     } else {
       setCountry(value);
     }
@@ -831,7 +831,7 @@ useEffect(() => {
           className="w-full my-16"
           value={Country}
           onChange={handleChipChange_country}
-          placeholder="Select Countrys"
+          placeholder="Select Countries"
           textFieldProps={{
             label: "Country",
             InputLabelProps: {
@@ -839,7 +839,7 @@ useEffect(() => {
             },
             variant: "outlined",
           }}
-          options={Countrys_suggest}
+          options={Countries_suggest}
           isMulti
         />
         <br />
@@ -851,7 +851,7 @@ useEffect(() => {
           className="w-full my-16"
           value={University}
           onChange={handleChipChange_University}
-          placeholder="Select Universitys"
+          placeholder="Select Universities"
           textFieldProps={{
             label: "University",
             InputLabelProps: {
@@ -907,7 +907,7 @@ useEffect(() => {
             onChange={handleChipChange_Field}
             placeholder="Select Field"
             textFieldProps={{
-              label: "FieldofResearch",
+              label: "Field of Research",
               InputLabelProps: {
                 shrink: true,
               },
@@ -926,8 +926,7 @@ useEffect(() => {
         </Button>
         {Filtered_PHD > 0 ? (
           <div>
-            You got {Filtered_PHD} Ph.D leads form {selected_departments_num}{" "}
-            departments. A list of filtered departments is given below
+            A total of {Filtered_PHD} leads are selected
           </div>
         ) : (
           <></>
